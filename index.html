@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MEGA MEKA #12531 | FRC</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -54,9 +54,38 @@
     ::-webkit-scrollbar-track { background: #06080f; }
     ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #00f0ff; }
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+    @keyframes rowIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+    @keyframes popIn{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:none}}
+    @keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 rgba(0,240,255,.55)}50%{box-shadow:0 0 0 8px rgba(0,240,255,0)}}
+    @keyframes grow{from{width:0}}
+    .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+    .reveal.in{opacity:1;transform:none}
+    .cyber-card,.cyber-card-red{transition:border-color .3s,box-shadow .3s}
+    .cyber-card:hover{border-color:rgba(0,240,255,.55);box-shadow:0 0 28px rgba(0,240,255,.14)}
+    .cyber-card-red:hover{box-shadow:0 0 28px rgba(255,0,60,.22)}
+    nav .w-11{animation:pulseDot 2.6s infinite}
+    #coachesContainer>div{transition:transform .25s,box-shadow .25s}
+    #coachesContainer>div:hover{transform:translateY(-4px)}
+    #membersTableBody tr{animation:rowIn .45s both}
+    #logsContainer>div{animation:fadeUp .45s both;transition:transform .2s}
+    #logsContainer>div:hover{transform:translateX(4px)}
+    #editModal.flex>div,#loginModal.flex>div{animation:popIn .3s cubic-bezier(.2,.9,.3,1.2)}
+    .sbar{height:3px;background:#1e293b;border-radius:2px;margin-top:4px;overflow:hidden}
+    .sbar i{display:block;height:100%;background:linear-gradient(90deg,#ff003c,#00f0ff);animation:grow .9s ease both}
+    .chip{padding:.4rem .75rem;border-radius:.5rem;font:700 11px Orbitron,sans-serif;text-transform:uppercase;background:#0f172a;border:1px solid #334155;color:#94a3b8;transition:.2s;cursor:pointer}
+    .chip:hover,.chip.on{border-color:#00f0ff;color:#00f0ff;background:rgba(0,240,255,.1)}
+    .pod{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;padding:.6rem;border-radius:.75rem .75rem 0 0;border:1px solid var(--c);background:linear-gradient(to top,color-mix(in srgb,var(--c) 18%,transparent),transparent);box-shadow:0 0 18px color-mix(in srgb,var(--c) 25%,transparent);animation:fadeUp .7s both}
+    .toast{padding:.7rem 1rem;border-radius:.6rem;font-weight:700;font-size:.9rem;background:#0b101c;border:1px solid;animation:popIn .3s both;box-shadow:0 8px 24px #0008}
+    .toast.ok{border-color:#00f0ff;color:#00f0ff}.toast.err{border-color:#ff003c;color:#ff6b8a}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
   </style>
 </head>
 <body class="min-h-screen pb-16">
+  <canvas id="bgFx" style="position:fixed;inset:0;z-index:0;pointer-events:none"></canvas>
+  <div id="sp" style="position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,#00f0ff,#ff003c);z-index:60"></div>
+  <div id="toasts" class="fixed bottom-4 right-4 z-[60] space-y-2"></div>
 
   <!-- Üst E-Spor HUD Barı -->
   <nav class="border-b border-cyan-500/30 bg-[#06080f]/95 sticky top-0 z-40 backdrop-blur-md">
@@ -90,7 +119,7 @@
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto px-4 mt-7 space-y-9">
+  <main class="relative z-10 max-w-7xl mx-auto px-4 mt-7 space-y-9">
 
     <!-- Üst Özet İstatistikler -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -342,6 +371,12 @@
           <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Başlangıç: 100 PTS • İhraç: ≤40 PTS</span>
         </div>
 
+        <div id="podium" class="grid grid-cols-3 gap-3 items-end"></div>
+        <div class="flex flex-wrap items-center gap-2">
+          <input id="searchBox" oninput="fQ=this.value.toLowerCase();renderMembersTable()" placeholder="🔍 Oyuncu ara..." class="flex-1 min-w-[160px] bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00f0ff]" />
+          <div id="deptChips" class="flex flex-wrap gap-1.5"></div>
+          <button onclick="exportCSV()" class="chip">⬇ CSV</button>
+        </div>
         <div class="cyber-card rounded-2xl overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
@@ -553,12 +588,12 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
         return;
       }
       container.innerHTML = coachesList.map(c => {
-        const delBtn = currentUser ? `<button onclick="deleteCoach('${c.id}', '${c.full_name}')" class="text-xs text-[#ff003c] hover:underline ml-2">Sil</button>` : '';
+        const delBtn = currentUser ? `<button onclick="deleteCoach('${c.id}')" class="text-xs text-[#ff003c] hover:underline ml-2">Sil</button>` : '';
         return `
           <div class="p-3.5 rounded-xl bg-gradient-to-r from-slate-900 to-[#1a0b14] border border-[#ff003c]/50 flex items-center justify-between shadow-[0_0_15px_rgba(255,0,60,0.1)]">
             <div>
-              <div class="font-bold text-base text-white">${c.full_name}</div>
-              <div class="text-xs font-semibold text-[#ff003c]">${c.title}</div>
+              <div class="font-bold text-base text-white">${esc(c.full_name)}</div>
+              <div class="text-xs font-semibold text-[#ff003c]">${esc(c.title)}</div>
             </div>
             <div class="flex items-center">
               <span class="px-2 py-0.5 rounded font-esports text-[10px] font-bold bg-[#ff003c]/20 text-[#ff003c] border border-[#ff003c]/40">COACH</span>
@@ -575,7 +610,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
       document.getElementById('captain1Container').innerHTML = cap1 
         ? `<div class="p-3 rounded-lg bg-cyan-950/30 border border-[#00f0ff]/60 flex items-center justify-between">
              <div>
-               <div class="font-bold text-white text-base">★ ${cap1.full_name}</div>
+               <div class="font-bold text-white text-base">★ ${esc(cap1.full_name)}</div>
                <div class="text-xs text-[#00f0ff] font-semibold">1. Takım Kaptanı • ${cap1.score} PTS</div>
              </div>
              ${currentUser ? `<button onclick="openEditModal('${cap1.id}')" class="text-xs text-slate-300 hover:text-[#00f0ff] underline">Düzenle</button>` : ''}
@@ -587,7 +622,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
       document.getElementById('captain2Container').innerHTML = cap2 
         ? `<div class="p-3 rounded-lg bg-rose-950/30 border border-[#ff003c]/60 flex items-center justify-between">
              <div>
-               <div class="font-bold text-white text-base">★ ${cap2.full_name}</div>
+               <div class="font-bold text-white text-base">★ ${esc(cap2.full_name)}</div>
                <div class="text-xs text-[#ff003c] font-semibold">2. Takım Kaptanı • ${cap2.score} PTS</div>
              </div>
              ${currentUser ? `<button onclick="openEditModal('${cap2.id}')" class="text-xs text-slate-300 hover:text-[#ff003c] underline">Düzenle</button>` : ''}
@@ -621,7 +656,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
             <div class="p-2 rounded bg-slate-950 border ${d.border} flex items-center justify-between">
               <div>
                 <div class="text-[10px] font-esports font-bold ${d.color} uppercase">◆ BİRİM LİDERİ</div>
-                <div class="text-sm font-bold text-white">${leader.full_name}</div>
+                <div class="text-sm font-bold text-white">${esc(leader.full_name)}</div>
               </div>
               <span class="font-esports text-xs font-bold text-slate-300">${leader.score}</span>
             </div>
@@ -634,7 +669,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
         if (regulars.length > 0) {
           html += `<ul class="space-y-1 pt-1">` + regulars.map(r => `
             <li class="flex items-center justify-between text-xs text-slate-300 px-1 py-0.5 rounded hover:bg-slate-800/60">
-              <span>• ${r.full_name}</span>
+              <span>• ${esc(r.full_name)}</span>
               <span class="font-esports text-[11px] text-slate-400">${r.score}</span>
             </li>
           `).join('') + `</ul>`;
@@ -648,12 +683,13 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
 
     function renderMembersTable() {
       const tbody = document.getElementById('membersTableBody');
+      renderPodium();
       const select = document.getElementById('logMemberSelect');
       
-      document.getElementById('statTotalMembers').innerText = membersList.length;
+      countUp('statTotalMembers', membersList.length);
       const avg = membersList.length ? Math.round(membersList.reduce((a, b) => a + b.score, 0) / membersList.length) : 100;
-      document.getElementById('statAvgScore').innerText = avg;
-      document.getElementById('statDangerCount').innerText = membersList.filter(m => m.score < 60).length;
+      countUp('statAvgScore', avg);
+      countUp('statDangerCount', membersList.filter(m => m.score < 60).length);
 
       if (membersList.length > 0) {
         document.getElementById('statMvpName').innerText = membersList[0].full_name;
@@ -666,31 +702,33 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
         return;
       }
 
-      tbody.innerHTML = membersList.map((m, idx) => {
+      const rows = membersList.map((m, idx) => ({m, idx})).filter(({m}) => (fD === 'all' || m.department === fD) && m.full_name.toLowerCase().includes(fQ));
+      if (!rows.length) tbody.innerHTML = '<tr><td colspan="6" class="py-10 text-center text-slate-500">Sonuç bulunamadı.</td></tr>';
+      else tbody.innerHTML = rows.map(({m, idx}) => {
         const rankStyle = idx === 0 ? 'text-[#00f0ff] glow-blue font-black text-lg' : idx < 3 ? 'text-blue-400 font-bold' : 'text-slate-500 font-bold';
         const scoreColor = m.score <= 40 ? 'text-[#ff003c] glow-red' : m.score < 60 ? 'text-orange-400' : m.score >= 120 ? 'text-[#00f0ff] glow-blue' : 'text-white';
         const adminBtns = currentUser ? `
           <td class="py-3.5 px-4 text-right space-x-2 whitespace-nowrap">
             <button onclick="openEditModal('${m.id}')" class="text-xs font-bold text-[#00f0ff] hover:underline">Düzenle</button>
-            <button onclick="deleteMember('${m.id}', '${m.full_name}')" class="text-xs font-bold text-[#ff003c] hover:underline">Çıkar</button>
+            <button onclick="deleteMember('${m.id}')" class="text-xs font-bold text-[#ff003c] hover:underline">Çıkar</button>
           </td>` : '';
         
         return `
           <tr class="hover:bg-[#00f0ff]/5 transition group">
-            <td class="py-3.5 px-4 font-esports ${rankStyle}">#${idx + 1}</td>
+            <td class="py-3.5 px-4 font-esports ${rankStyle}">${['🥇','🥈','🥉'][idx] || '#' + (idx + 1)}</td>
             <td class="py-3.5 px-4">
-              <div class="font-bold text-white text-base group-hover:text-[#00f0ff] transition">${m.full_name}</div>
+              <div class="font-bold text-white text-base group-hover:text-[#00f0ff] transition">${esc(m.full_name)}</div>
               <div class="mt-0.5">${getRoleBadge(m.role_type)}</div>
             </td>
             <td class="py-3.5 px-4 font-bold text-xs uppercase text-slate-300">${m.department}</td>
             <td class="py-3.5 px-4">${getEsportsTier(m.score)}</td>
-            <td class="py-3.5 px-4 text-right font-esports font-extrabold text-lg ${scoreColor}">${m.score}</td>
+            <td class="py-3.5 px-4 text-right min-w-[90px]"><div class="font-esports font-extrabold text-lg ${scoreColor}">${m.score}</div><div class="sbar"><i style="width:${Math.max(4, Math.min(100, m.score / 1.5))}%"></i></div></td>
             ${adminBtns}
           </tr>
         `;
       }).join('');
 
-      select.innerHTML = membersList.map(m => `<option value="${m.id}">${m.full_name} [${m.department}] (${m.score} PTS)</option>`).join('');
+      select.innerHTML = membersList.map(m => `<option value="${m.id}">${esc(m.full_name)} [${m.department}] (${m.score} PTS)</option>`).join('');
     }
 
     function renderLogs(logs) {
@@ -711,13 +749,13 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
         return `
           <div class="p-3.5 rounded-lg border ${cardBorder} space-y-1.5">
             <div class="flex items-center justify-between gap-2">
-              <span class="font-bold text-base text-white">${log.members?.full_name || 'Eski Oyuncu'}</span>
+              <span class="font-bold text-base text-white">${esc(log.members?.full_name || 'Eski Oyuncu')}</span>
               <span class="px-2 py-0.5 rounded font-esports text-xs font-bold border ${badgeClass}">
                 ${isPositive ? '+' + log.points : log.points} PTS
               </span>
             </div>
-            <div class="text-xs font-bold ${titleColor}">${log.criterion}</div>
-            ${log.note ? `<p class="text-xs text-slate-300 bg-black/30 p-2 rounded border border-slate-800/80">"${log.note}"</p>` : ''}
+            <div class="text-xs font-bold ${titleColor}">${esc(log.criterion)}</div>
+            ${log.note ? `<p class="text-xs text-slate-300 bg-black/30 p-2 rounded border border-slate-800/80">"${esc(log.note)}"</p>` : ''}
             <div class="flex items-center justify-between pt-1 text-xs text-slate-500 font-semibold">
               <span>📅 ${dateFormatted}</span>
               ${delAction}
@@ -751,7 +789,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
         closeEditModal();
         loadDashboard();
       } else {
-        alert("Güncelleme hatası: " + error.message);
+        toast("Güncelleme hatası: " + error.message);
       }
     });
 
@@ -771,7 +809,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
       if (currentUser) {
         authDiv.innerHTML = `
           <div class="flex items-center gap-3">
-            <span class="text-xs font-bold text-[#00f0ff] hidden sm:inline">${currentUser.email}</span>
+            <span class="text-xs font-bold text-[#00f0ff] hidden sm:inline">${esc(currentUser.email)}</span>
             <button onclick="logout()" class="px-3 py-1.5 rounded font-esports text-[11px] font-bold uppercase btn-neon-red transition">LOGOUT</button>
           </div>
         `;
@@ -824,7 +862,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
         document.getElementById('memberName').value = '';
         loadDashboard();
       } else {
-        alert("Hata: " + error.message);
+        toast("Hata: " + error.message);
       }
     });
 
@@ -839,7 +877,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
         document.getElementById('coachTitle').value = '';
         loadDashboard();
       } else {
-        alert("Hata: " + error.message);
+        toast("Hata: " + error.message);
       }
     });
 
@@ -854,9 +892,10 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
       const { error } = await supabaseClient.from('score_logs').insert([{ member_id, work_date, criterion, points, note }]);
       if (!error) {
         document.getElementById('logNote').value = '';
+        toast('Puan işlendi ✔','ok');
         loadDashboard();
       } else {
-        alert("Hata: " + error.message);
+        toast("Hata: " + error.message);
       }
     });
 
@@ -866,17 +905,97 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
       if (!error) loadDashboard();
     }
 
-    async function deleteMember(id, name) {
+    async function deleteMember(id) {
+      const name = (membersList.find(x => x.id === id) || {}).full_name || '';
       if (!confirm(`${name} adlı öğrenciyi kadrodan çıkarmak istediğinize emin misiniz?`)) return;
       const { error } = await supabaseClient.from('members').delete().eq('id', id);
       if (!error) loadDashboard();
     }
 
-    async function deleteCoach(id, name) {
+    async function deleteCoach(id) {
+      const name = (coachesList.find(x => x.id === id) || {}).full_name || '';
       if (!confirm(`${name} adlı koçu listeden çıkarmak istediğinize emin misiniz?`)) return;
       const { error } = await supabaseClient.from('coaches').delete().eq('id', id);
       if (!error) loadDashboard();
     }
+
+    // ===== EK ÖZELLİKLER =====
+    let fQ = '', fD = 'all', rtTimer;
+    const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    function toast(msg, type = 'err') {
+      const t = document.createElement('div');
+      t.className = 'toast ' + type; t.textContent = msg;
+      document.getElementById('toasts').appendChild(t);
+      setTimeout(() => { t.style.transition = 'opacity .4s'; t.style.opacity = 0; setTimeout(() => t.remove(), 400); }, 3500);
+    }
+
+    function countUp(id, to) {
+      const el = document.getElementById(id), from = parseInt(el.textContent) || 0;
+      if (from === to) { el.textContent = to; return; }
+      const t0 = performance.now();
+      (function step(t) {
+        const k = Math.min(1, (t - t0) / 700);
+        el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)));
+        if (k < 1) requestAnimationFrame(step);
+      })(t0);
+    }
+
+    function renderPodium() {
+      const el = document.getElementById('podium'), t = membersList.slice(0, 3);
+      if (t.length < 3) { el.innerHTML = ''; return; }
+      const cfg = [{i:1,h:'h-28',c:'#cbd5e1',e:'🥈'},{i:0,h:'h-36',c:'#00f0ff',e:'🥇'},{i:2,h:'h-24',c:'#fb923c',e:'🥉'}];
+      el.innerHTML = cfg.map((p, k) => { const m = t[p.i];
+        return `<div class="pod ${p.h}" style="--c:${p.c};animation-delay:${k*120}ms"><div class="text-2xl">${p.e}</div><div class="font-bold text-white truncate w-full text-center">${esc(m.full_name)}</div><div class="font-esports text-sm" style="color:${p.c}">${m.score}</div><div class="text-[10px] text-slate-400 uppercase">${esc(m.department)}</div></div>`;
+      }).join('');
+    }
+
+    function setDept(d) { fD = d; buildChips(); renderMembersTable(); }
+    function buildChips() {
+      document.getElementById('deptChips').innerHTML = ['all','PR','Mekanik','Yazılım','Elektronik']
+        .map(d => `<button class="chip ${fD === d ? 'on' : ''}" onclick="setDept('${d}')">${d === 'all' ? 'Tümü' : d}</button>`).join('');
+    }
+    buildChips();
+
+    function exportCSV() {
+      const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+      const rows = [['Sıra','Ad Soyad','Ekip','Rol','Skor'], ...membersList.map((m, i) => [i + 1, m.full_name, m.department, m.role_type, m.score])];
+      const blob = new Blob(['\ufeff' + rows.map(r => r.map(q).join(';')).join('\n')], {type: 'text/csv;charset=utf-8'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'megameka-liderlik.csv'; a.click();
+      toast('CSV indirildi ✔', 'ok');
+    }
+
+    // Scroll göstergesi, reveal, Esc
+    addEventListener('scroll', () => { document.getElementById('sp').style.width = (scrollY / (document.documentElement.scrollHeight - innerHeight || 1) * 100) + '%'; }, {passive: true});
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold: .08});
+    document.querySelectorAll('main > *').forEach((el, i) => { el.classList.add('reveal'); el.style.transitionDelay = (i * 60) + 'ms'; io.observe(el); });
+    addEventListener('keydown', e => { if (e.key === 'Escape') { closeEditModal(); closeLoginModal(); } });
+
+    // Canlı güncelleme (Supabase Realtime açıksa)
+    try {
+      supabaseClient.channel('live').on('postgres_changes', {event: '*', schema: 'public'}, () => {
+        clearTimeout(rtTimer); rtTimer = setTimeout(loadDashboard, 400);
+      }).subscribe();
+    } catch (e) {}
+
+    // Arka plan parçacık ağı
+    (() => {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const c = document.getElementById('bgFx'), x = c.getContext('2d'); let w, h, P = [];
+      const rs = () => { w = c.width = innerWidth; h = c.height = innerHeight;
+        P = Array.from({length: Math.min(60, w / 22 | 0)}, () => ({x: Math.random()*w, y: Math.random()*h, vx: (Math.random()-.5)*.35, vy: (Math.random()-.5)*.35, b: Math.random() > .5})); };
+      rs(); addEventListener('resize', rs);
+      (function f() {
+        x.clearRect(0, 0, w, h);
+        P.forEach((p, i) => {
+          p.x = (p.x + p.vx + w) % w; p.y = (p.y + p.vy + h) % h;
+          x.fillStyle = p.b ? 'rgba(0,240,255,.7)' : 'rgba(255,0,60,.6)'; x.fillRect(p.x, p.y, 2, 2);
+          for (let j = i + 1; j < P.length; j++) { const q = P[j], d = Math.hypot(p.x - q.x, p.y - q.y);
+            if (d < 120) { x.strokeStyle = `rgba(0,240,255,${.12 * (1 - d / 120)})`; x.beginPath(); x.moveTo(p.x, p.y); x.lineTo(q.x, q.y); x.stroke(); } }
+        });
+        requestAnimationFrame(f);
+      })();
+    })();
 
     checkAuth();
   </script>
