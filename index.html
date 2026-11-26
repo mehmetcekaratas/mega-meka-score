@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MEGA MEKA #12531 | ESPORTS ARENA & COMMAND HIERARCHY</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neon-blue: #00f0ff;
+      --neon-red: #ff003c;
+      --bg-dark: #06080f;
+    }
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 90%, rgba(255, 0, 60, 0.08) 0%, transparent 40%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+      color: #e2e8f0;
+    }
+    .font-esports { font-family: 'Orbitron', sans-serif; }
+    .cyber-card {
+      background: rgba(11, 16, 28, 0.9);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.05);
+      backdrop-filter: blur(12px);
+    }
+    .cyber-card-red {
+      background: rgba(16, 10, 20, 0.9);
+      border: 1px solid rgba(255, 0, 60, 0.35);
+      box-shadow: 0 0 20px rgba(255, 0, 60, 0.08);
+    }
+    .glow-blue { text-shadow: 0 0 12px rgba(0, 240, 255, 0.65); }
+    .glow-red { text-shadow: 0 0 12px rgba(255, 0, 60, 0.65); }
+    .btn-neon-blue {
+      background: linear-gradient(90deg, #0284c7, #00f0ff);
+      color: #030712;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
+    }
+    .btn-neon-blue:hover { box-shadow: 0 0 25px rgba(0, 240, 255, 0.75); }
+    .btn-neon-red {
+      background: linear-gradient(90deg, #be123c, #ff003c);
+      color: #ffffff;
+      box-shadow: 0 0 15px rgba(255, 0, 60, 0.35);
+    }
+    .btn-neon-red:hover { box-shadow: 0 0 25px rgba(255, 0, 60, 0.75); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #06080f; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00f0ff; }
+  </style>
+</head>
+<body class="min-h-screen pb-16">
+
+  <!-- Üst E-Spor HUD Barı -->
+  <nav class="border-b border-cyan-500/30 bg-[#06080f]/95 sticky top-0 z-40 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded bg-gradient-to-br from-[#00f0ff] via-blue-600 to-[#ff003c] p-[2px] shadow-[0_0_15px_rgba(0,240,255,0.4)]">
+          <div class="w-full h-full bg-[#06080f] flex items-center justify-center font-esports font-black text-white text-base tracking-wider">
+            MM
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-esports font-extrabold text-lg sm:text-xl text-white tracking-wider">
+              MEGA MEKA <span class="text-[#00f0ff] glow-blue">#12531</span>
+            </h1>
+            <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] font-esports font-bold uppercase tracking-widest bg-[#ff003c]/20 text-[#ff003c] border border-[#ff003c]/50 rounded">
+              ROSTER & COMMAND
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-400 font-semibold tracking-wide">
+            FRC 2026–2027 CANOPY SEASON // TAKIM HİYERARŞİSİ & PERFORMANS SİSTEMİ
+          </p>
+        </div>
+      </div>
+
+      <div id="authSection">
+        <button onclick="openLoginModal()" class="px-4 py-2 rounded font-esports text-xs font-bold tracking-wider uppercase bg-slate-900 text-[#00f0ff] border border-[#00f0ff]/50 hover:bg-[#00f0ff]/10 transition">
+          MENTOR LOGIN
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-4 mt-7 space-y-9">
+
+    <!-- Üst Özet İstatistikler -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="cyber-card rounded-xl p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-1 h-full bg-[#00f0ff]"></div>
+        <p class="text-xs font-esports text-slate-400 uppercase tracking-wider">ÖĞRENCİ KADROSU</p>
+        <p id="statTotalMembers" class="font-esports text-2xl sm:text-3xl font-black text-white mt-1">0</p>
+        <p class="text-xs text-cyan-400 mt-0.5">4 Teknik & PR Birimi</p>
+      </div>
+
+      <div class="cyber-card rounded-xl p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+        <p class="text-xs font-esports text-slate-400 uppercase tracking-wider">TAKIM SKOR ORT.</p>
+        <p id="statAvgScore" class="font-esports text-2xl sm:text-3xl font-black text-[#00f0ff] glow-blue mt-1">100</p>
+        <p class="text-xs text-slate-400 mt-0.5">Genel Performans</p>
+      </div>
+
+      <div class="cyber-card rounded-xl p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
+        <p class="text-xs font-esports text-slate-400 uppercase tracking-wider">LİDER / MVP</p>
+        <p id="statMvpName" class="font-bold text-lg sm:text-xl text-white truncate mt-1.5">-</p>
+        <p id="statMvpScore" class="text-xs text-[#00f0ff] font-semibold">100 PTS</p>
+      </div>
+
+      <div class="cyber-card-red rounded-xl p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-1 h-full bg-[#ff003c]"></div>
+        <p class="text-xs font-esports text-[#ff003c] uppercase tracking-wider">TEHLİKE BÖLGESİ</p>
+        <p id="statDangerCount" class="font-esports text-2xl sm:text-3xl font-black text-[#ff003c] glow-red mt-1">0</p>
+        <p class="text-xs text-slate-400 mt-0.5">Yedek / İhraç Sınırı (&lt;60)</p>
+      </div>
+    </div>
+
+    <!-- MENTÖR KONTROL PANELİ (SADECE YETKİLİ GİRİŞİNDE AÇILIR) -->
+    <section id="mentorPanel" class="hidden space-y-6">
+      <div class="cyber-card rounded-2xl p-6 border-[#00f0ff]/60 shadow-[0_0_30px_rgba(0,240,255,0.12)]">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-6 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="font-esports text-base sm:text-lg font-bold text-[#00f0ff] glow-blue tracking-wide">
+              COMMAND CENTER // MENTÖR YÖNETİM PANELİ
+            </h2>
+            <p class="text-sm text-slate-400">Puan işleyin, yeni öğrenci/koç ekleyin veya birim liderlerini düzenleyin.</p>
+          </div>
+          <span class="px-3 py-1 rounded text-xs font-esports font-bold bg-[#00f0ff]/15 text-[#00f0ff] border border-[#00f0ff]/40">
+            ADMIN ACCESS
+          </span>
+        </div>
+
+        <div class="grid lg:grid-cols-12 gap-6">
+          <!-- 1. Puan İşleme Formu (6 Kolon) -->
+          <form id="scoreForm" class="lg:col-span-6 space-y-4 bg-slate-950/75 p-5 rounded-xl border border-slate-800">
+            <div class="flex items-center justify-between">
+              <h3 class="font-esports text-sm font-bold text-white uppercase tracking-wider">1. Haftalık Puan İşle</h3>
+              <div class="flex gap-2 text-xs font-bold">
+                <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-[#00f0ff]">+ ÖDÜL</span>
+                <span class="px-2 py-0.5 rounded bg-rose-500/20 text-[#ff003c]">- CEZA</span>
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Oyuncu Seçin</label>
+                <select id="logMemberSelect" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold text-white focus:outline-none focus:border-[#00f0ff]"></select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Çalışma Tarihi</label>
+                <input type="date" id="logDate" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold text-white focus:outline-none focus:border-[#00f0ff]" />
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-3 gap-3">
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Ödül / Ceza Kriteri</label>
+                <select id="logCriterionSelect" onchange="autoFillPoints()" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold text-white focus:outline-none focus:border-[#00f0ff]">
+                  <optgroup label="🏆 ÖDÜL & TEŞVİK SİSTEMİ (+ PUAN)">
+                    <option value="🏆 MVP / Haftanın Yıldızı Performansı|15">🏆 MVP / Haftanın Yıldızı (+15 Puan)</option>
+                    <option value="🤝 Sponsorluk veya Kaynak Katkısı|15">🤝 Sponsorluk / Kaynak Katkısı (+15 Puan)</option>
+                    <option value="⚡ Erken Görev Teslimi & Ekstra Destek|10">⚡ Erken Görev Teslimi & Destek (+10 Puan)</option>
+                    <option value="🔥 4 Hafta Kesintisiz Tam Katılım Serisi|10">🔥 4 Hafta Kesintisiz Seri (+10 Puan)</option>
+                    <option value="🛡️ Atölye Düzeni ve İSG Örnekliği|5">🛡️ Atölye Düzeni ve İSG Örnekliği (+5 Puan)</option>
+                  </optgroup>
+                  <optgroup label="⚠️ DİSİPLİN & İHLAL CEZALARI (- PUAN)">
+                    <option value="🚫 İzinsiz Devamsızlık|-15">🚫 İzinsiz Devamsızlık (-15 Puan)</option>
+                    <option value="⏰ Geç Kalma (15+ dk)|-5">⏰ Geç Kalma - 15+ dk (-5 Puan)</option>
+                    <option value="📉 Görev İhmali / Teslim Etmeme|-10">📉 Görev İhmali / Teslim Etmeme (-10 Puan)</option>
+                    <option value="🤬 Küfür ve Argo Kullanımı|-15">🤬 Küfür ve Argo Kullanımı (-15 Puan)</option>
+                    <option value="💥 Huzur Bozucu Davranış / Sabotaj|-20">💥 Huzur Bozucu Davranış (-20 Puan)</option>
+                    <option value="🔧 Atölye ve Ekipman İhmali|-10">🔧 Atölye ve Ekipman İhmali (-10 Puan)</option>
+                    <option value="🦺 İş Güvenliği (İSG) İhlali|-15">🦺 İş Güvenliği (İSG) İhlali (-15 Puan)</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Puan</label>
+                <input type="number" id="logPoints" value="15" required class="w-full bg-slate-900 border border-[#00f0ff]/50 rounded-lg px-3 py-2 font-esports text-sm font-bold text-[#00f0ff] focus:outline-none" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Açıklama / Not</label>
+              <input type="text" id="logNote" placeholder="Örn: Otonom kod testini başarıyla tamamladı." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00f0ff]" />
+            </div>
+
+            <button type="submit" id="submitScoreBtn" class="w-full py-2.5 rounded-lg font-esports text-xs font-extrabold uppercase tracking-wider btn-neon-blue transition">
+              🏆 ÖDÜL PUANINI ONAYLA
+            </button>
+          </form>
+
+          <!-- 2. Yeni Öğrenci Üye Ekleme (3 Kolon) -->
+          <form id="memberForm" class="lg:col-span-3 space-y-3.5 bg-slate-950/75 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+            <div class="space-y-3.5">
+              <h3 class="font-esports text-sm font-bold text-white uppercase tracking-wider">2. Öğrenci Üye Ekle</h3>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Ad Soyad</label>
+                <input type="text" id="memberName" required placeholder="Örn: Ahmet Yılmaz" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold text-white focus:outline-none focus:border-[#00f0ff]" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Ekip / Birim</label>
+                <select id="memberDept" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold text-white focus:outline-none focus:border-[#00f0ff]">
+                  <option value="PR">PR</option>
+                  <option value="Mekanik">Mekanik</option>
+                  <option value="Yazılım">Yazılım</option>
+                  <option value="Elektronik">Elektronik</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Hiyerarşi Rolü</label>
+                <select id="memberRole" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold text-white focus:outline-none focus:border-[#00f0ff]">
+                  <option value="Üye">Takım Üyesi</option>
+                  <option value="Birim Lideri">Birim Lideri</option>
+                  <option value="Kaptan (PR & Mekanik)">1. Kaptan (PR & Mekanik)</option>
+                  <option value="Kaptan (Yazılım & Elektronik)">2. Kaptan (Yazılım & Elektronik)</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="w-full py-2.5 rounded-lg font-esports text-xs font-bold uppercase tracking-wider bg-slate-800 hover:bg-slate-700 text-[#00f0ff] border border-[#00f0ff]/40 transition mt-3">
+              + ÖĞRENCİ EKLE
+            </button>
+          </form>
+
+          <!-- 3. Koç / Mentör Ekleme (3 Kolon) -->
+          <form id="coachForm" class="lg:col-span-3 space-y-3.5 bg-slate-950/75 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+            <div class="space-y-3.5">
+              <h3 class="font-esports text-sm font-bold text-[#ff003c] uppercase tracking-wider">3. Koç / Mentör Ekle</h3>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Koç Adı Soyadı</label>
+                <input type="text" id="coachName" required placeholder="Örn: Mehmet Karataş" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold text-white focus:outline-none focus:border-[#ff003c]" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Unvan / Görev</label>
+                <input type="text" id="coachTitle" required placeholder="Örn: Lead Mentor & Robotics Coord." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold text-white focus:outline-none focus:border-[#ff003c]" />
+              </div>
+            </div>
+            <button type="submit" class="w-full py-2.5 rounded-lg font-esports text-xs font-bold uppercase tracking-wider bg-slate-800 hover:bg-slate-700 text-[#ff003c] border border-[#ff003c]/40 transition mt-3">
+              + KOÇ EKLE
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAKIM KOMUTA HİYERARŞİSİ (ORGANİZASYON ŞEMASI) -->
+    <section class="space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 class="font-esports text-lg font-bold text-white tracking-wide flex items-center gap-2">
+          <span class="w-2.5 h-2.5 bg-[#00f0ff] inline-block rotate-45"></span>
+          COMMAND HIERARCHY // TAKIM ORGANİZASYON ŞEMASI
+        </h2>
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">2 Koç • 2 Kaptan • 4 Birim & Liderleri</span>
+      </div>
+
+      <div class="cyber-card rounded-2xl p-5 sm:p-7 space-y-6">
+        
+        <!-- SEVİYE 1: KOÇLAR (2 KOÇ) -->
+        <div>
+          <div class="text-center mb-3">
+            <span class="px-3 py-1 rounded-full font-esports text-[11px] font-bold tracking-widest bg-[#ff003c]/15 text-[#ff003c] border border-[#ff003c]/40 uppercase">
+              HEAD COACHES // TAKIM KOÇLARI
+            </span>
+          </div>
+          <div id="coachesContainer" class="grid sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
+            <!-- Dinamik Koç Kartları -->
+          </div>
+        </div>
+
+        <!-- Bağlantı Çizgisi -->
+        <div class="flex justify-center">
+          <div class="h-6 w-[2px] bg-gradient-to-b from-[#ff003c] to-[#00f0ff]"></div>
+        </div>
+
+        <!-- SEVİYE 2: İKİ ANA KOL (1. KAPTAN: PR & MEKANİK | 2. KAPTAN: YAZILIM & ELEKTRONİK) -->
+        <div class="grid lg:grid-cols-2 gap-6">
+          
+          <!-- SOL KOL: 1. TAKIM KAPTANI (PR & MEKANİK) -->
+          <div class="rounded-xl border border-[#00f0ff]/35 bg-slate-950/60 p-4 sm:p-5 space-y-4">
+            <div class="border-b border-slate-800 pb-3">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-esports text-[10px] font-bold tracking-widest text-[#00f0ff] uppercase">1. TAKIM KAPTANI // OPERASYON & ÜRETİM</span>
+                <span class="text-xs font-bold text-slate-400">PR & Mekanik</span>
+              </div>
+              <div id="captain1Container">
+                <!-- 1. Kaptan Kartı -->
+              </div>
+            </div>
+
+            <!-- Alt Ekipler: PR ve Mekanik -->
+            <div class="grid sm:grid-cols-2 gap-4">
+              <!-- PR Ekibi -->
+              <div id="teamBox-PR" class="rounded-lg bg-slate-900/70 border border-slate-800 p-3.5 space-y-2.5"></div>
+              <!-- Mekanik Ekibi -->
+              <div id="teamBox-Mekanik" class="rounded-lg bg-slate-900/70 border border-slate-800 p-3.5 space-y-2.5"></div>
+            </div>
+          </div>
+
+          <!-- SAĞ KOL: 2. TAKIM KAPTANI (YAZILIM & ELEKTRONİK) -->
+          <div class="rounded-xl border border-[#ff003c]/35 bg-slate-950/60 p-4 sm:p-5 space-y-4">
+            <div class="border-b border-slate-800 pb-3">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-esports text-[10px] font-bold tracking-widest text-[#ff003c] uppercase">2. TAKIM KAPTANI // TEKNOLOJİ & KONTROL</span>
+                <span class="text-xs font-bold text-slate-400">Yazılım & Elektronik</span>
+              </div>
+              <div id="captain2Container">
+                <!-- 2. Kaptan Kartı -->
+              </div>
+            </div>
+
+            <!-- Alt Ekipler: Yazılım ve Elektronik -->
+            <div class="grid sm:grid-cols-2 gap-4">
+              <!-- Yazılım Ekibi -->
+              <div id="teamBox-Yazılım" class="rounded-lg bg-slate-900/70 border border-slate-800 p-3.5 space-y-2.5"></div>
+              <!-- Elektronik Ekibi -->
+              <div id="teamBox-Elektronik" class="rounded-lg bg-slate-900/70 border border-slate-800 p-3.5 space-y-2.5"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ANA İÇERİK: LEADERBOARD VE CANLI AKIŞ -->
+    <div class="grid lg:grid-cols-3 gap-8">
+      
+      <!-- Sol 2 Sütun: E-Spor Liderlik Tablosu -->
+      <div class="lg:col-span-2 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h2 class="font-esports text-lg font-bold text-white tracking-wide flex items-center gap-2">
+            <span class="w-2.5 h-2.5 bg-[#00f0ff] inline-block rotate-45"></span>
+            LEADERBOARD // PUAN SIRALAMASI
+          </h2>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Başlangıç: 100 PTS • İhraç: ≤40 PTS</span>
+        </div>
+
+        <div class="cyber-card rounded-2xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-cyan-500/20 font-esports text-[11px] uppercase text-slate-400 bg-slate-950/80">
+                  <th class="py-4 px-4">RANK</th>
+                  <th class="py-4 px-4">OYUNCU & ROL</th>
+                  <th class="py-4 px-4">EKİP</th>
+                  <th class="py-4 px-4">TIER</th>
+                  <th class="py-4 px-4 text-right">SKOR</th>
+                  <th id="thAction" class="py-4 px-4 text-right hidden">YÖNET</th>
+                </tr>
+              </thead>
+              <tbody id="membersTableBody" class="divide-y divide-slate-800/80 text-base">
+                <tr><td colspan="6" class="py-10 text-center text-slate-500 font-esports text-xs">VERİLER YÜKLENİYOR...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- E-Spor Tier & Kural Rehberi -->
+        <div class="cyber-card rounded-xl p-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <div class="p-2.5 rounded bg-cyan-950/30 border border-[#00f0ff]/30">
+            <div class="font-esports font-bold text-[#00f0ff]">120+ CHALLENGER</div>
+            <div class="text-slate-300 mt-0.5">Pit & Drive Team Önceliği</div>
+          </div>
+          <div class="p-2.5 rounded bg-blue-950/30 border border-blue-500/30">
+            <div class="font-esports font-bold text-blue-400">100-119 DIAMOND</div>
+            <div class="text-slate-300 mt-0.5">Ana Turnuva Kadrosu</div>
+          </div>
+          <div class="p-2.5 rounded bg-orange-950/30 border border-orange-500/30">
+            <div class="font-esports font-bold text-orange-400">&lt;60 BENCHED</div>
+            <div class="text-slate-300 mt-0.5">Seyahat Kadrosu Yedeği</div>
+          </div>
+          <div class="p-2.5 rounded bg-rose-950/40 border border-[#ff003c]/40">
+            <div class="font-esports font-bold text-[#ff003c]">≤40 ELIMINATED</div>
+            <div class="text-slate-300 mt-0.5">Takımdan İhraç Sınırı</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sağ Sütun: Canlı Ödül ve Ceza Geçmişi -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="font-esports text-lg font-bold text-white tracking-wide flex items-center gap-2">
+            <span class="w-2.5 h-2.5 bg-[#ff003c] inline-block rotate-45"></span>
+            ACTIVITY FEED
+          </h2>
+          <span class="text-xs font-bold text-slate-400 uppercase">Ödül & Ceza Logu</span>
+        </div>
+
+        <div id="logsContainer" class="cyber-card rounded-2xl p-4 space-y-3 max-h-[660px] overflow-y-auto">
+          <p class="text-center font-esports text-xs text-slate-500 py-8">KAYITLAR YÜKLENİYOR...</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Üye Düzenleme Modalı (Rol / Ekip / İsim Güncelleme) -->
+  <div id="editModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="cyber-card rounded-2xl max-w-md w-full p-6 space-y-5 border-[#00f0ff]/60 shadow-[0_0_40px_rgba(0,240,255,0.2)]">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-esports text-base font-bold text-[#00f0ff]">OYUNCU BİLGİLERİNİ DÜZENLE</h3>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+      <form id="editMemberForm" class="space-y-4">
+        <input type="hidden" id="editMemberId" />
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Ad Soyad</label>
+          <input type="text" id="editMemberName" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-[#00f0ff]" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Ekip / Birim</label>
+          <select id="editMemberDept" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-[#00f0ff]">
+            <option value="PR">PR</option>
+            <option value="Mekanik">Mekanik</option>
+            <option value="Yazılım">Yazılım</option>
+            <option value="Elektronik">Elektronik</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Hiyerarşi Rolü</label>
+          <select id="editMemberRole" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-[#00f0ff]">
+            <option value="Üye">Takım Üyesi</option>
+            <option value="Birim Lideri">Birim Lideri</option>
+            <option value="Kaptan (PR & Mekanik)">1. Kaptan (PR & Mekanik)</option>
+            <option value="Kaptan (Yazılım & Elektronik)">2. Kaptan (Yazılım & Elektronik)</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-lg font-esports text-xs font-extrabold uppercase tracking-wider btn-neon-blue transition">
+          DEĞİŞİKLİKLERİ KAYDET
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mentör Giriş Modalı -->
+  <div id="loginModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="cyber-card rounded-2xl max-w-sm w-full p-6 space-y-5 border-[#00f0ff]/50 shadow-[0_0_40px_rgba(0,240,255,0.2)]">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-esports text-base font-bold text-[#00f0ff]">MENTOR AUTHENTICATION</h3>
+        <button onclick="closeLoginModal()" class="text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">E-posta</label>
+          <input type="email" id="loginEmail" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#00f0ff]" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Şifre</label>
+          <input type="password" id="loginPassword" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#00f0ff]" />
+        </div>
+        <p id="loginError" class="text-xs font-bold text-[#ff003c] hidden"></p>
+        <button type="submit" class="w-full py-3 rounded-lg font-esports text-xs font-extrabold uppercase tracking-wider btn-neon-blue transition">
+          SİSTEME BAĞLAN
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // SUPABASE BİLGİLERİNİ BURAYA YAPIŞTIR
+    // =========================================================================
+    const SUPABASE_URL = 'https://pnobbrnlmarctthoyvep.supabase.co/rest/v1/';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBub2Jicm5sbWFyY3R0aG95dmVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU3MTE3NDksImV4cCI6MjExMTI4Nzc0OX0.vDZuhdQWDfnzykeOqxLL8GlLZ_Cjg6hHGs_4vpn_21g';
+    // =========================================================================
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let currentUser = null;
+    let membersList = [];
+    let coachesList = [];
+
+    document.getElementById('logDate').valueAsDate = new Date();
+
+    function autoFillPoints() {
+      const val = document.getElementById('logCriterionSelect').value;
+      const pts = parseInt(val.split('|')[1], 10);
+      const ptsInput = document.getElementById('logPoints');
+      const submitBtn = document.getElementById('submitScoreBtn');
+      
+      ptsInput.value = pts;
+      if (pts >= 0) {
+        ptsInput.className = "w-full bg-slate-900 border border-[#00f0ff]/50 rounded-lg px-3 py-2 font-esports text-sm font-bold text-[#00f0ff] focus:outline-none";
+        submitBtn.className = "w-full py-2.5 rounded-lg font-esports text-xs font-extrabold uppercase tracking-wider btn-neon-blue transition";
+        submitBtn.innerText = "🏆 ÖDÜL PUANINI ONAYLA";
+      } else {
+        ptsInput.className = "w-full bg-slate-900 border border-[#ff003c]/50 rounded-lg px-3 py-2 font-esports text-sm font-bold text-[#ff003c] focus:outline-none";
+        submitBtn.className = "w-full py-2.5 rounded-lg font-esports text-xs font-extrabold uppercase tracking-wider btn-neon-red transition";
+        submitBtn.innerText = "⚠️ CEZA PUANINI UYGULA";
+      }
+    }
+
+    function getEsportsTier(score) {
+      if (score <= 40) return '<span class="px-2 py-0.5 rounded font-esports text-[10px] font-bold bg-[#ff003c]/20 text-[#ff003c] border border-[#ff003c]">ELIMINATED</span>';
+      if (score < 60) return '<span class="px-2 py-0.5 rounded font-esports text-[10px] font-bold bg-orange-500/20 text-orange-400 border border-orange-500/50">BENCHED</span>';
+      if (score < 80) return '<span class="px-2 py-0.5 rounded font-esports text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">WARNING</span>';
+      if (score < 100) return '<span class="px-2 py-0.5 rounded font-esports text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-600">ACTIVE</span>';
+      if (score < 120) return '<span class="px-2 py-0.5 rounded font-esports text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-400/50">DIAMOND</span>';
+      return '<span class="px-2 py-0.5 rounded font-esports text-[10px] font-bold bg-[#00f0ff]/20 text-[#00f0ff] border border-[#00f0ff]">CHALLENGER</span>';
+    }
+
+    function getRoleBadge(role) {
+      if (role && role.startsWith('Kaptan')) {
+        return `<span class="px-2 py-0.5 rounded text-[10px] font-esports font-bold bg-gradient-to-r from-[#00f0ff]/20 to-[#ff003c]/20 text-white border border-[#00f0ff]/60">★ ${role.toUpperCase()}</span>`;
+      }
+      if (role === 'Birim Lideri') {
+        return `<span class="px-2 py-0.5 rounded text-[10px] font-esports font-bold bg-cyan-500/15 text-[#00f0ff] border border-[#00f0ff]/40">◆ BİRİM LİDERİ</span>`;
+      }
+      return `<span class="text-xs text-slate-400 font-semibold">Üye</span>`;
+    }
+
+    async function loadDashboard() {
+      // 1. Koçları Çek
+      const { data: coaches } = await supabaseClient.from('coaches').select('*').order('created_at', { ascending: true });
+      coachesList = coaches || [];
+      renderCoaches();
+
+      // 2. Üyeleri Çek
+      const { data: members, error: mErr } = await supabaseClient
+        .from('members')
+        .select('*')
+        .order('score', { ascending: false })
+        .order('full_name', { ascending: true });
+
+      if (!mErr) {
+        membersList = members || [];
+        renderHierarchy();
+        renderMembersTable();
+      }
+
+      // 3. Logları Çek
+      const { data: logs, error: lErr } = await supabaseClient
+        .from('score_logs')
+        .select('*, members(full_name)')
+        .order('work_date', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (!lErr) renderLogs(logs || []);
+    }
+
+    // HİYERARŞİ AĞACINI ÇİZ
+    function renderCoaches() {
+      const container = document.getElementById('coachesContainer');
+      if (coachesList.length === 0) {
+        container.innerHTML = '<div class="col-span-2 text-center text-xs text-slate-500 py-3 border border-dashed border-slate-800 rounded-lg">Henüz koç tanımlanmadı (Mentör panelinden ekleyebilirsiniz).</div>';
+        return;
+      }
+      container.innerHTML = coachesList.map(c => {
+        const delBtn = currentUser ? `<button onclick="deleteCoach('${c.id}', '${c.full_name}')" class="text-xs text-[#ff003c] hover:underline ml-2">Sil</button>` : '';
+        return `
+          <div class="p-3.5 rounded-xl bg-gradient-to-r from-slate-900 to-[#1a0b14] border border-[#ff003c]/50 flex items-center justify-between shadow-[0_0_15px_rgba(255,0,60,0.1)]">
+            <div>
+              <div class="font-bold text-base text-white">${c.full_name}</div>
+              <div class="text-xs font-semibold text-[#ff003c]">${c.title}</div>
+            </div>
+            <div class="flex items-center">
+              <span class="px-2 py-0.5 rounded font-esports text-[10px] font-bold bg-[#ff003c]/20 text-[#ff003c] border border-[#ff003c]/40">COACH</span>
+              ${delBtn}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderHierarchy() {
+      // 1. Kaptan (PR & Mekanik)
+      const cap1 = membersList.find(m => m.role_type === 'Kaptan (PR & Mekanik)');
+      document.getElementById('captain1Container').innerHTML = cap1 
+        ? `<div class="p-3 rounded-lg bg-cyan-950/30 border border-[#00f0ff]/60 flex items-center justify-between">
+             <div>
+               <div class="font-bold text-white text-base">★ ${cap1.full_name}</div>
+               <div class="text-xs text-[#00f0ff] font-semibold">1. Takım Kaptanı • ${cap1.score} PTS</div>
+             </div>
+             ${currentUser ? `<button onclick="openEditModal('${cap1.id}')" class="text-xs text-slate-300 hover:text-[#00f0ff] underline">Düzenle</button>` : ''}
+           </div>`
+        : `<div class="p-2.5 rounded border border-dashed border-slate-700 text-xs text-slate-500">1. Kaptan (PR & Mekanik) henüz atanmadı.</div>`;
+
+      // 2. Kaptan (Yazılım & Elektronik)
+      const cap2 = membersList.find(m => m.role_type === 'Kaptan (Yazılım & Elektronik)');
+      document.getElementById('captain2Container').innerHTML = cap2 
+        ? `<div class="p-3 rounded-lg bg-rose-950/30 border border-[#ff003c]/60 flex items-center justify-between">
+             <div>
+               <div class="font-bold text-white text-base">★ ${cap2.full_name}</div>
+               <div class="text-xs text-[#ff003c] font-semibold">2. Takım Kaptanı • ${cap2.score} PTS</div>
+             </div>
+             ${currentUser ? `<button onclick="openEditModal('${cap2.id}')" class="text-xs text-slate-300 hover:text-[#ff003c] underline">Düzenle</button>` : ''}
+           </div>`
+        : `<div class="p-2.5 rounded border border-dashed border-slate-700 text-xs text-slate-500">2. Kaptan (Yazılım & Elektronik) henüz atanmadı.</div>`;
+
+      // 4 Birim Kutusu (PR, Mekanik, Yazılım, Elektronik)
+      const depts = [
+        { key: 'PR', color: 'text-[#00f0ff]', border: 'border-[#00f0ff]/30' },
+        { key: 'Mekanik', color: 'text-[#00f0ff]', border: 'border-[#00f0ff]/30' },
+        { key: 'Yazılım', color: 'text-[#ff003c]', border: 'border-[#ff003c]/30' },
+        { key: 'Elektronik', color: 'text-[#ff003c]', border: 'border-[#ff003c]/30' }
+      ];
+
+      depts.forEach(d => {
+        const box = document.getElementById(`teamBox-${d.key}`);
+        const teamMembers = membersList.filter(m => m.department === d.key);
+        const leader = teamMembers.find(m => m.role_type === 'Birim Lideri');
+        const regulars = teamMembers.filter(m => m.role_type !== 'Birim Lideri' && !m.role_type.startsWith('Kaptan'));
+
+        let html = `
+          <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+            <span class="font-esports text-xs font-bold ${d.color} uppercase tracking-wider">${d.key} EKİBİ</span>
+            <span class="text-[11px] font-bold text-slate-500">${teamMembers.length} Kişi</span>
+          </div>
+        `;
+
+        // Birim Lideri
+        if (leader) {
+          html += `
+            <div class="p-2 rounded bg-slate-950 border ${d.border} flex items-center justify-between">
+              <div>
+                <div class="text-[10px] font-esports font-bold ${d.color} uppercase">◆ BİRİM LİDERİ</div>
+                <div class="text-sm font-bold text-white">${leader.full_name}</div>
+              </div>
+              <span class="font-esports text-xs font-bold text-slate-300">${leader.score}</span>
+            </div>
+          `;
+        } else {
+          html += `<div class="text-[11px] text-slate-500 italic py-1">Birim lideri atanmadı</div>`;
+        }
+
+        // Ekip Üyeleri
+        if (regulars.length > 0) {
+          html += `<ul class="space-y-1 pt-1">` + regulars.map(r => `
+            <li class="flex items-center justify-between text-xs text-slate-300 px-1 py-0.5 rounded hover:bg-slate-800/60">
+              <span>• ${r.full_name}</span>
+              <span class="font-esports text-[11px] text-slate-400">${r.score}</span>
+            </li>
+          `).join('') + `</ul>`;
+        } else if (!leader) {
+          html += `<div class="text-xs text-slate-600">Üye yok</div>`;
+        }
+
+        box.innerHTML = html;
+      });
+    }
+
+    function renderMembersTable() {
+      const tbody = document.getElementById('membersTableBody');
+      const select = document.getElementById('logMemberSelect');
+      
+      document.getElementById('statTotalMembers').innerText = membersList.length;
+      const avg = membersList.length ? Math.round(membersList.reduce((a, b) => a + b.score, 0) / membersList.length) : 100;
+      document.getElementById('statAvgScore').innerText = avg;
+      document.getElementById('statDangerCount').innerText = membersList.filter(m => m.score < 60).length;
+
+      if (membersList.length > 0) {
+        document.getElementById('statMvpName').innerText = membersList[0].full_name;
+        document.getElementById('statMvpScore').innerText = membersList[0].score + ' PTS // ' + membersList[0].department;
+      }
+
+      if (membersList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="py-10 text-center text-slate-500">Henüz kadroya öğrenci eklenmedi.</td></tr>';
+        select.innerHTML = '<option value="">Önce öğrenci ekleyin</option>';
+        return;
+      }
+
+      tbody.innerHTML = membersList.map((m, idx) => {
+        const rankStyle = idx === 0 ? 'text-[#00f0ff] glow-blue font-black text-lg' : idx < 3 ? 'text-blue-400 font-bold' : 'text-slate-500 font-bold';
+        const scoreColor = m.score <= 40 ? 'text-[#ff003c] glow-red' : m.score < 60 ? 'text-orange-400' : m.score >= 120 ? 'text-[#00f0ff] glow-blue' : 'text-white';
+        const adminBtns = currentUser ? `
+          <td class="py-3.5 px-4 text-right space-x-2 whitespace-nowrap">
+            <button onclick="openEditModal('${m.id}')" class="text-xs font-bold text-[#00f0ff] hover:underline">Düzenle</button>
+            <button onclick="deleteMember('${m.id}', '${m.full_name}')" class="text-xs font-bold text-[#ff003c] hover:underline">Çıkar</button>
+          </td>` : '';
+        
+        return `
+          <tr class="hover:bg-[#00f0ff]/5 transition group">
+            <td class="py-3.5 px-4 font-esports ${rankStyle}">#${idx + 1}</td>
+            <td class="py-3.5 px-4">
+              <div class="font-bold text-white text-base group-hover:text-[#00f0ff] transition">${m.full_name}</div>
+              <div class="mt-0.5">${getRoleBadge(m.role_type)}</div>
+            </td>
+            <td class="py-3.5 px-4 font-bold text-xs uppercase text-slate-300">${m.department}</td>
+            <td class="py-3.5 px-4">${getEsportsTier(m.score)}</td>
+            <td class="py-3.5 px-4 text-right font-esports font-extrabold text-lg ${scoreColor}">${m.score}</td>
+            ${adminBtns}
+          </tr>
+        `;
+      }).join('');
+
+      select.innerHTML = membersList.map(m => `<option value="${m.id}">${m.full_name} [${m.department}] (${m.score} PTS)</option>`).join('');
+    }
+
+    function renderLogs(logs) {
+      const container = document.getElementById('logsContainer');
+      if (logs.length === 0) {
+        container.innerHTML = '<p class="text-center text-sm text-slate-500 py-8">Henüz ödül veya ceza kaydı girilmedi.</p>';
+        return;
+      }
+
+      container.innerHTML = logs.map(log => {
+        const isPositive = log.points > 0;
+        const cardBorder = isPositive ? 'border-l-4 border-l-[#00f0ff] border-slate-800 bg-cyan-950/10' : 'border-l-4 border-l-[#ff003c] border-slate-800 bg-rose-950/10';
+        const badgeClass = isPositive ? 'text-[#00f0ff] bg-[#00f0ff]/15 border-[#00f0ff]/40' : 'text-[#ff003c] bg-[#ff003c]/15 border-[#ff003c]/40';
+        const titleColor = isPositive ? 'text-[#00f0ff]' : 'text-[#ff003c]';
+        const dateFormatted = new Date(log.work_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+        const delAction = currentUser ? `<button onclick="deleteLog('${log.id}')" class="text-xs text-slate-400 hover:text-[#ff003c] underline">Geri Al</button>` : '';
+
+        return `
+          <div class="p-3.5 rounded-lg border ${cardBorder} space-y-1.5">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-bold text-base text-white">${log.members?.full_name || 'Eski Oyuncu'}</span>
+              <span class="px-2 py-0.5 rounded font-esports text-xs font-bold border ${badgeClass}">
+                ${isPositive ? '+' + log.points : log.points} PTS
+              </span>
+            </div>
+            <div class="text-xs font-bold ${titleColor}">${log.criterion}</div>
+            ${log.note ? `<p class="text-xs text-slate-300 bg-black/30 p-2 rounded border border-slate-800/80">"${log.note}"</p>` : ''}
+            <div class="flex items-center justify-between pt-1 text-xs text-slate-500 font-semibold">
+              <span>📅 ${dateFormatted}</span>
+              ${delAction}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Üye Düzenleme Modal İşlemleri
+    function openEditModal(id) {
+      const m = membersList.find(x => x.id === id);
+      if (!m) return;
+      document.getElementById('editMemberId').value = m.id;
+      document.getElementById('editMemberName').value = m.full_name;
+      document.getElementById('editMemberDept').value = m.department;
+      document.getElementById('editMemberRole').value = m.role_type || 'Üye';
+      document.getElementById('editModal').classList.replace('hidden', 'flex');
+    }
+    function closeEditModal() { document.getElementById('editModal').classList.replace('flex', 'hidden'); }
+
+    document.getElementById('editMemberForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('editMemberId').value;
+      const full_name = document.getElementById('editMemberName').value.trim();
+      const department = document.getElementById('editMemberDept').value;
+      const role_type = document.getElementById('editMemberRole').value;
+
+      const { error } = await supabaseClient.from('members').update({ full_name, department, role_type }).eq('id', id);
+      if (!error) {
+        closeEditModal();
+        loadDashboard();
+      } else {
+        alert("Güncelleme hatası: " + error.message);
+      }
+    });
+
+    // Auth & CRUD İşlemleri
+    async function checkAuth() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      currentUser = session?.user || null;
+      updateUIForAuth();
+      loadDashboard();
+    }
+
+    function updateUIForAuth() {
+      const authDiv = document.getElementById('authSection');
+      const mentorPanel = document.getElementById('mentorPanel');
+      const thAction = document.getElementById('thAction');
+
+      if (currentUser) {
+        authDiv.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-bold text-[#00f0ff] hidden sm:inline">${currentUser.email}</span>
+            <button onclick="logout()" class="px-3 py-1.5 rounded font-esports text-[11px] font-bold uppercase btn-neon-red transition">LOGOUT</button>
+          </div>
+        `;
+        mentorPanel.classList.remove('hidden');
+        thAction.classList.remove('hidden');
+      } else {
+        authDiv.innerHTML = `<button onclick="openLoginModal()" class="px-4 py-2 rounded font-esports text-xs font-bold tracking-wider uppercase bg-slate-900 text-[#00f0ff] border border-[#00f0ff]/50 hover:bg-[#00f0ff]/10 transition">MENTOR LOGIN</button>`;
+        mentorPanel.classList.add('hidden');
+        thAction.classList.add('hidden');
+      }
+    }
+
+    function openLoginModal() { document.getElementById('loginModal').classList.replace('hidden', 'flex'); }
+    function closeLoginModal() { document.getElementById('loginModal').classList.replace('flex', 'hidden'); }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const errEl = document.getElementById('loginError');
+
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        errEl.innerText = "ERİŞİM REDDEDİLDİ: E-posta veya şifre hatalı.";
+        errEl.classList.remove('hidden');
+      } else {
+        errEl.classList.add('hidden');
+        currentUser = data.user;
+        closeLoginModal();
+        updateUIForAuth();
+        loadDashboard();
+      }
+    });
+
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      currentUser = null;
+      updateUIForAuth();
+      loadDashboard();
+    }
+
+    document.getElementById('memberForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const full_name = document.getElementById('memberName').value.trim();
+      const department = document.getElementById('memberDept').value;
+      const role_type = document.getElementById('memberRole').value;
+
+      const { error } = await supabaseClient.from('members').insert([{ full_name, department, role_type, score: 100 }]);
+      if (!error) {
+        document.getElementById('memberName').value = '';
+        loadDashboard();
+      } else {
+        alert("Hata: " + error.message);
+      }
+    });
+
+    document.getElementById('coachForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const full_name = document.getElementById('coachName').value.trim();
+      const title = document.getElementById('coachTitle').value.trim();
+
+      const { error } = await supabaseClient.from('coaches').insert([{ full_name, title }]);
+      if (!error) {
+        document.getElementById('coachName').value = '';
+        document.getElementById('coachTitle').value = '';
+        loadDashboard();
+      } else {
+        alert("Hata: " + error.message);
+      }
+    });
+
+    document.getElementById('scoreForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const member_id = document.getElementById('logMemberSelect').value;
+      const work_date = document.getElementById('logDate').value;
+      const criterion = document.getElementById('logCriterionSelect').value.split('|')[0];
+      const points = parseInt(document.getElementById('logPoints').value, 10);
+      const note = document.getElementById('logNote').value.trim();
+
+      const { error } = await supabaseClient.from('score_logs').insert([{ member_id, work_date, criterion, points, note }]);
+      if (!error) {
+        document.getElementById('logNote').value = '';
+        loadDashboard();
+      } else {
+        alert("Hata: " + error.message);
+      }
+    });
+
+    async function deleteLog(id) {
+      if (!confirm("Bu kaydı geri almak istediğinize emin misiniz? Puan otomatik güncellenecektir.")) return;
+      const { error } = await supabaseClient.from('score_logs').delete().eq('id', id);
+      if (!error) loadDashboard();
+    }
+
+    async function deleteMember(id, name) {
+      if (!confirm(`${name} adlı öğrenciyi kadrodan çıkarmak istediğinize emin misiniz?`)) return;
+      const { error } = await supabaseClient.from('members').delete().eq('id', id);
+      if (!error) loadDashboard();
+    }
+
+    async function deleteCoach(id, name) {
+      if (!confirm(`${name} adlı koçu listeden çıkarmak istediğinize emin misiniz?`)) return;
+      const { error } = await supabaseClient.from('coaches').delete().eq('id', id);
+      if (!error) loadDashboard();
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>
