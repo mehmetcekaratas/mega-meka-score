@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MEGA MEKA #12531 | FRC</title>
+  <title>MEGA MEKA #12531 | ESPORTS ARENA & COMMAND HIERARCHY</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -200,7 +200,7 @@
                     <option value="🔥 4 Hafta Kesintisiz Tam Katılım Serisi|10">🔥 4 Hafta Kesintisiz Seri (+10 Puan)</option>
                     <option value="🛡️ Atölye Düzeni ve İSG Örnekliği|5">🛡️ Atölye Düzeni ve İSG Örnekliği (+5 Puan)</option>
                   </optgroup>
-                  <optgroup label="⚠️ DİSİPLİN & İHLAL CEZALARI (- PUAN)">
+                    <optgroup label="⚠️ DİSİPLİN & İHLAL CEZALARI (- PUAN)">
                     <option value="🚫 İzinsiz Devamsızlık|-15">🚫 İzinsiz Devamsızlık (-15 Puan)</option>
 		    <option value="🚫 Mazeretli Devamsızlık|-5">🚫 Mazeretli Devamsızlık (-5 Puan)</option>
                     <option value="⏰ Geç Kalma (15+ dk)|-5">⏰ Geç Kalma - 15+ dk (-5 Puan)</option>
@@ -250,8 +250,8 @@
                 <select id="memberRole" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold text-white focus:outline-none focus:border-[#00f0ff]">
                   <option value="Üye">Takım Üyesi</option>
                   <option value="Birim Lideri">Birim Lideri</option>
-                  <option value="Kaptan (PR & Mekanik)">1. Kaptan (PR & Mekanik)</option>
-                  <option value="Kaptan (Yazılım & Elektronik)">2. Kaptan (Yazılım & Elektronik)</option>
+                  <option value="Kaptan (PR & Mekanik)">1. Kaptan (PR & Mekanik) • Komuta Kadrosu</option>
+                  <option value="Kaptan (Yazılım & Elektronik)">2. Kaptan (Yazılım & Elektronik) • Komuta Kadrosu</option>
                 </select>
               </div>
             </div>
@@ -310,20 +310,24 @@
           <div class="h-6 w-[2px] bg-gradient-to-b from-[#ff003c] to-[#00f0ff]"></div>
         </div>
 
+        <!-- SEVİYE 1.5: TAKIM KAPTANLARI (COMMAND STAFF) -->
+        <div>
+          <div class="text-center mb-3">
+            <span class="px-3 py-1 rounded-full font-esports text-[11px] font-bold tracking-widest bg-[#00f0ff]/10 text-[#00f0ff] border border-[#00f0ff]/40 uppercase">TEAM CAPTAINS // KOMUTA KADROSU</span>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
+            <div id="captain1Container"></div>
+            <div id="captain2Container"></div>
+          </div>
+        </div>
+        <div class="flex justify-center"><div class="h-6 w-[2px] bg-gradient-to-b from-[#00f0ff] to-[#ff003c]"></div></div>
+
         <!-- SEVİYE 2: İKİ ANA KOL (1. KAPTAN: PR & MEKANİK | 2. KAPTAN: YAZILIM & ELEKTRONİK) -->
         <div class="grid lg:grid-cols-2 gap-6">
           
           <!-- SOL KOL: 1. TAKIM KAPTANI (PR & MEKANİK) -->
           <div class="rounded-xl border border-[#00f0ff]/35 bg-slate-950/60 p-4 sm:p-5 space-y-4">
-            <div class="border-b border-slate-800 pb-3">
-              <div class="flex items-center justify-between mb-1">
-                <span class="font-esports text-[10px] font-bold tracking-widest text-[#00f0ff] uppercase">1. TAKIM KAPTANI // OPERASYON & ÜRETİM</span>
-                <span class="text-xs font-bold text-slate-400">PR & Mekanik</span>
-              </div>
-              <div id="captain1Container">
-                <!-- 1. Kaptan Kartı -->
-              </div>
-            </div>
+            <div class="border-b border-slate-800 pb-2 flex items-center justify-between"><span class="font-esports text-[10px] font-bold tracking-widest uppercase text-[#00f0ff]">OPERASYON & ÜRETİM KOLU</span><span class="text-xs font-bold text-slate-400">PR & Mekanik</span></div>
 
             <!-- Alt Ekipler: PR ve Mekanik -->
             <div class="grid sm:grid-cols-2 gap-4">
@@ -336,15 +340,7 @@
 
           <!-- SAĞ KOL: 2. TAKIM KAPTANI (YAZILIM & ELEKTRONİK) -->
           <div class="rounded-xl border border-[#ff003c]/35 bg-slate-950/60 p-4 sm:p-5 space-y-4">
-            <div class="border-b border-slate-800 pb-3">
-              <div class="flex items-center justify-between mb-1">
-                <span class="font-esports text-[10px] font-bold tracking-widest text-[#ff003c] uppercase">2. TAKIM KAPTANI // TEKNOLOJİ & KONTROL</span>
-                <span class="text-xs font-bold text-slate-400">Yazılım & Elektronik</span>
-              </div>
-              <div id="captain2Container">
-                <!-- 2. Kaptan Kartı -->
-              </div>
-            </div>
+            <div class="border-b border-slate-800 pb-2 flex items-center justify-between"><span class="font-esports text-[10px] font-bold tracking-widest uppercase text-[#ff003c]">TEKNOLOJİ & KONTROL KOLU</span><span class="text-xs font-bold text-slate-400">Yazılım & Elektronik</span></div>
 
             <!-- Alt Ekipler: Yazılım ve Elektronik -->
             <div class="grid sm:grid-cols-2 gap-4">
@@ -464,8 +460,8 @@
           <select id="editMemberRole" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-[#00f0ff]">
             <option value="Üye">Takım Üyesi</option>
             <option value="Birim Lideri">Birim Lideri</option>
-            <option value="Kaptan (PR & Mekanik)">1. Kaptan (PR & Mekanik)</option>
-            <option value="Kaptan (Yazılım & Elektronik)">2. Kaptan (Yazılım & Elektronik)</option>
+            <option value="Kaptan (PR & Mekanik)">1. Kaptan (PR & Mekanik) • Komuta Kadrosu</option>
+            <option value="Kaptan (Yazılım & Elektronik)">2. Kaptan (Yazılım & Elektronik) • Komuta Kadrosu</option>
           </select>
         </div>
         <button type="submit" class="w-full py-3 rounded-lg font-esports text-xs font-extrabold uppercase tracking-wider btn-neon-blue transition">
@@ -509,7 +505,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let currentUser = null;
-    let membersList = [];
+    let membersList = [], allMembers = [];
     let coachesList = [];
 
     document.getElementById('logDate').valueAsDate = new Date();
@@ -565,7 +561,8 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
         .order('full_name', { ascending: true });
 
       if (!mErr) {
-        membersList = members || [];
+        allMembers = members || [];
+        membersList = allMembers.filter(m => !String(m.role_type || '').startsWith('Kaptan'));
         renderHierarchy();
         renderMembersTable();
       }
@@ -607,26 +604,26 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
 
     function renderHierarchy() {
       // 1. Kaptan (PR & Mekanik)
-      const cap1 = membersList.find(m => m.role_type === 'Kaptan (PR & Mekanik)');
+      const cap1 = allMembers.find(m => m.role_type === 'Kaptan (PR & Mekanik)');
       document.getElementById('captain1Container').innerHTML = cap1 
         ? `<div class="p-3 rounded-lg bg-cyan-950/30 border border-[#00f0ff]/60 flex items-center justify-between">
              <div>
                <div class="font-bold text-white text-base">★ ${esc(cap1.full_name)}</div>
-               <div class="text-xs text-[#00f0ff] font-semibold">1. Takım Kaptanı • ${cap1.score} PTS</div>
+               <div class="text-xs text-[#00f0ff] font-semibold">1. Takım Kaptanı • PR & Mekanik</div>
              </div>
-             ${currentUser ? `<button onclick="openEditModal('${cap1.id}')" class="text-xs text-slate-300 hover:text-[#00f0ff] underline">Düzenle</button>` : ''}
+             ${currentUser ? `<div class="space-x-2 whitespace-nowrap"><button onclick="openEditModal('${cap1.id}')" class="text-xs text-slate-300 hover:text-[#00f0ff] underline">Düzenle</button><button onclick="deleteMember('${cap1.id}')" class="text-xs text-[#ff003c] hover:underline">Çıkar</button></div>` : ''}
            </div>`
         : `<div class="p-2.5 rounded border border-dashed border-slate-700 text-xs text-slate-500">1. Kaptan (PR & Mekanik) henüz atanmadı.</div>`;
 
       // 2. Kaptan (Yazılım & Elektronik)
-      const cap2 = membersList.find(m => m.role_type === 'Kaptan (Yazılım & Elektronik)');
+      const cap2 = allMembers.find(m => m.role_type === 'Kaptan (Yazılım & Elektronik)');
       document.getElementById('captain2Container').innerHTML = cap2 
         ? `<div class="p-3 rounded-lg bg-rose-950/30 border border-[#ff003c]/60 flex items-center justify-between">
              <div>
                <div class="font-bold text-white text-base">★ ${esc(cap2.full_name)}</div>
-               <div class="text-xs text-[#ff003c] font-semibold">2. Takım Kaptanı • ${cap2.score} PTS</div>
+               <div class="text-xs text-[#ff003c] font-semibold">2. Takım Kaptanı • Yazılım & Elektronik</div>
              </div>
-             ${currentUser ? `<button onclick="openEditModal('${cap2.id}')" class="text-xs text-slate-300 hover:text-[#ff003c] underline">Düzenle</button>` : ''}
+             ${currentUser ? `<div class="space-x-2 whitespace-nowrap"><button onclick="openEditModal('${cap2.id}')" class="text-xs text-slate-300 hover:text-[#ff003c] underline">Düzenle</button><button onclick="deleteMember('${cap2.id}')" class="text-xs text-[#ff003c] hover:underline">Çıkar</button></div>` : ''}
            </div>`
         : `<div class="p-2.5 rounded border border-dashed border-slate-700 text-xs text-slate-500">2. Kaptan (Yazılım & Elektronik) henüz atanmadı.</div>`;
 
@@ -642,7 +639,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
         const box = document.getElementById(`teamBox-${d.key}`);
         const teamMembers = membersList.filter(m => m.department === d.key);
         const leader = teamMembers.find(m => m.role_type === 'Birim Lideri');
-        const regulars = teamMembers.filter(m => m.role_type !== 'Birim Lideri' && !m.role_type.startsWith('Kaptan'));
+        const regulars = teamMembers.filter(m => m.role_type !== 'Birim Lideri' && !(m.role_type || '').startsWith('Kaptan'));
 
         let html = `
           <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
@@ -768,7 +765,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
 
     // Üye Düzenleme Modal İşlemleri
     function openEditModal(id) {
-      const m = membersList.find(x => x.id === id);
+      const m = allMembers.find(x => x.id === id);
       if (!m) return;
       document.getElementById('editMemberId').value = m.id;
       document.getElementById('editMemberName').value = m.full_name;
@@ -784,6 +781,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
       const full_name = document.getElementById('editMemberName').value.trim();
       const department = document.getElementById('editMemberDept').value;
       const role_type = document.getElementById('editMemberRole').value;
+      if (role_type.startsWith('Kaptan') && allMembers.some(x => x.role_type === role_type && x.id !== id)) return toast('Bu kaptan pozisyonu dolu. Önce mevcut kaptanı çıkarın veya rolünü değiştirin.');
 
       const { error } = await supabaseClient.from('members').update({ full_name, department, role_type }).eq('id', id);
       if (!error) {
@@ -857,6 +855,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
       const full_name = document.getElementById('memberName').value.trim();
       const department = document.getElementById('memberDept').value;
       const role_type = document.getElementById('memberRole').value;
+      if (role_type.startsWith('Kaptan') && allMembers.some(x => x.role_type === role_type && x.id !== null)) return toast('Bu kaptan pozisyonu dolu. Önce mevcut kaptanı çıkarın veya rolünü değiştirin.');
 
       const { error } = await supabaseClient.from('members').insert([{ full_name, department, role_type, score: 100 }]);
       if (!error) {
@@ -907,7 +906,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
     }
 
     async function deleteMember(id) {
-      const name = (membersList.find(x => x.id === id) || {}).full_name || '';
+      const name = (allMembers.find(x => x.id === id) || {}).full_name || '';
       if (!confirm(`${name} adlı öğrenciyi kadrodan çıkarmak istediğinize emin misiniz?`)) return;
       const { error } = await supabaseClient.from('members').delete().eq('id', id);
       if (!error) loadDashboard();
@@ -945,9 +944,9 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xtZ-AHlJb-pyQ0Sh7moCbQ_V9aVRCQa';
     function renderPodium() {
       const el = document.getElementById('podium'), t = membersList.slice(0, 3);
       if (t.length < 3) { el.innerHTML = ''; return; }
-      const cfg = [{i:1,h:'h-28',c:'#cbd5e1',e:'🥈'},{i:0,h:'h-36',c:'#00f0ff',e:'🥇'},{i:2,h:'h-24',c:'#fb923c',e:'🥉'}];
+      const cfg = [{i:1,h:'min-h-[8.5rem]',c:'#cbd5e1',e:'🥈'},{i:0,h:'min-h-[10.5rem]',c:'#00f0ff',e:'🥇'},{i:2,h:'min-h-[7.5rem]',c:'#fb923c',e:'🥉'}];
       el.innerHTML = cfg.map((p, k) => { const m = t[p.i];
-        return `<div class="pod ${p.h}" style="--c:${p.c};animation-delay:${k*120}ms"><div class="text-2xl">${p.e}</div><div class="font-bold text-white truncate w-full text-center">${esc(m.full_name)}</div><div class="font-esports text-sm" style="color:${p.c}">${m.score}</div><div class="text-[10px] text-slate-400 uppercase">${esc(m.department)}</div></div>`;
+        return `<div class="pod ${p.h}" style="--c:${p.c};animation-delay:${k*120}ms"><div class="text-2xl">${p.e}</div><div class="font-bold text-white w-full text-center leading-tight break-words text-sm sm:text-base">${esc(m.full_name)}</div><div class="font-esports text-sm" style="color:${p.c}">${m.score}</div><div class="text-[10px] text-slate-400 uppercase">${esc(m.department)}</div></div>`;
       }).join('');
     }
 
